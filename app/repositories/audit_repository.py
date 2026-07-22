@@ -47,7 +47,9 @@ class AuditRepository:
             query = query.filter(
                 or_(
                     AuditLog.description.ilike(f"%{search}%"),
-                    AuditLog.resource_id.ilike(f"%{search}%")
+                    AuditLog.user_email.ilike(f"%{search}%"),
+                    AuditLog.resource_id.ilike(f"%{search}%"),
+                    AuditLog.module.ilike(f"%{search}%")
                 )
             )
 

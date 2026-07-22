@@ -10,8 +10,11 @@ from app.dependencies.auth import UserRole, require_roles
 
 def get_audit_service(
     db: Session = Depends(get_db),
-) -> AuditService:
-    return AuditService(db, AuditRepository)
+):
+    return AuditService(
+        db=db,
+        audit_repo=AuditRepository(db),
+    )
 
 router = APIRouter(
     prefix="/audit-logs",

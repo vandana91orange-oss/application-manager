@@ -60,10 +60,10 @@ class UploadRepository:
 
                 filters.append(
                     or_(
-                        CSVUploadedFile.original_filename.ilike(
+                        CSVUploadedFile.original_file_name.ilike(
                             search_pattern
                         ),
-                        CSVUploadedFile.file_type.ilike(
+                        CSVUploadedFile.file_name.ilike(
                             search_pattern
                         ),
                         CSVUploadedFile.status.ilike(
