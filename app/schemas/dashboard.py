@@ -15,8 +15,8 @@ class DashboardSummary(BaseModel):
 
 
 class MigrationStatusItem(BaseModel):
-    status: str
-    count: int
+    status: str | None = None
+    count: int | None = None
 
 
 class CloudDistributionItem(BaseModel):

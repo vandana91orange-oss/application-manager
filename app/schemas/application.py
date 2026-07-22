@@ -219,14 +219,22 @@ class OwnerResponse(BaseModel):
 
 
 class ApplicationDetailsResponse(BaseModel):
-
     application: ApplicationResponse
-    meta_data: ApplicationMetadataResponse
-    migration: MigrationResponse
-    security: ApplicationSecurityResponse
-    remark: list[ApplicationRemarkResponse]
-    owners: list[OwnerResponse]
-    clouds: list[ApplicationCloudResponse]
+
+    meta_data: ApplicationMetadataResponse | None = None
+    migration: MigrationResponse | None = None
+    security: ApplicationSecurityResponse | None = None
+
+    remark: list[ApplicationRemarkResponse] = Field(
+        default_factory=list
+    )
+    owners: list[OwnerResponse] = Field(
+        default_factory=list
+    )
+    clouds: list[ApplicationCloudResponse] = Field(
+        default_factory=list
+    )
+
     model_config = ConfigDict(from_attributes=True)
 
 

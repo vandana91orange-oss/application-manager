@@ -1,6 +1,8 @@
+from typing import Annotated, Literal
+
 from app.core.security import hash_password, verify_password
 from app.models.users import User
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -14,6 +16,7 @@ from app.schemas.user import (
     ChangePasswordRequest, 
     MessageResponse
 )
+from app.schemas.pagination import PaginatedResponse
 
 from app.repositories.user_repository import UserRepository
 from app.services.user_service import UserService
@@ -56,7 +59,7 @@ def create_user(
 
 @router.get(
     "",
-    response_model=list[UserResponse]
+    response_model=PaginatedResponse[UserResponse],
 )
 def users(
     service=Depends(get_service),
@@ -66,12 +69,37 @@ def users(
             UserRole.MANAGER,
             UserRole.EMPLOYEE,
             UserRole.VIEWER,
-
         )
-    )
-):
+    ),
 
-    return service.get_all()
+    # Pagination
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 10,
+
+    # Search/filtering
+    search: Annotated[str | None, Query(max_length=100)] = None,
+    role_id: Annotated[int | None, Query(ge=1)] = None,
+    is_active: bool | None = None,
+
+    # Sorting
+    sort_by: Literal[
+        "id",
+        "first_name",
+        "last_name",
+        "email",
+        "created_at",
+    ] = "created_at",
+    sort_order: Literal["asc", "desc"] = "desc",
+):
+    return service.get_all(
+        page=page,
+        page_size=page_size,
+        search=search,
+        role_id=role_id,
+        is_active=is_active,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 @router.get(

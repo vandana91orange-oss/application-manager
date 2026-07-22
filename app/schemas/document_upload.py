@@ -31,10 +31,7 @@ class UploadedFileResponse(BaseModel):
 class UploadStatus:
 
     PENDING = "Pending"
-
     PROCESSING = "Processing"
-
     COMPLETED = "Completed"
-
     FAILED = "Failed"
     PARTIAL_SUCCESS = "Partial"

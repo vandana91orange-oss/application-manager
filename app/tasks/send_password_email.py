@@ -21,8 +21,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from app.config import settings
+from app.celery_app import celery
 
 
+@celery.task
 def send_reset_email(email: str, token: str):
     reset_link = f"http://localhost:3000/reset-password?token={token}"
 
@@ -42,7 +44,7 @@ def send_reset_email(email: str, token: str):
                         style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
 
                         <tr>
-                            <td style="background:#2563eb;padding:24px;text-align:center;">
+                            <td style="background:#F97316;padding:24px;text-align:center;">
                                 <h1 style="color:#ffffff;margin:0;font-size:24px;">
                                     Service Manager
                                 </h1>
@@ -51,8 +53,9 @@ def send_reset_email(email: str, token: str):
 
                         <tr>
                             <td style="padding:40px;">
-                                <h2 style="margin-top:0;color:#333;">
-                                    Reset Your Password
+                                <h2 style="margin-top:0;color:#F97316;">
+
+                                        Reset Your Password
                                 </h2>
 
                                 <p style="font-size:16px;color:#555;line-height:1.6;">
@@ -66,14 +69,14 @@ def send_reset_email(email: str, token: str):
 
                                 <div style="text-align:center;margin:35px 0;">
                                     <a href="{reset_link}"
-                                       style="background:#2563eb;
-                                              color:#ffffff;
-                                              text-decoration:none;
-                                              padding:14px 32px;
-                                              border-radius:6px;
-                                              display:inline-block;
-                                              font-size:16px;
-                                              font-weight:bold;">
+                                    style="background:#F97316;
+                                            color:#ffffff;
+                                            text-decoration:none;
+                                            padding:14px 32px;
+                                            border-radius:6px;
+                                            display:inline-block;
+                                            font-size:16px;
+                                            font-weight:bold;">
                                         Reset Password
                                     </a>
                                 </div>
@@ -96,7 +99,7 @@ def send_reset_email(email: str, token: str):
                                     the following link into your browser:
                                 </p>
 
-                                <p style="word-break:break-all;font-size:13px;color:#2563eb;">
+                                <p style="word-break:break-all;font-size:13px;color:#F97316;">
                                     {reset_link}
                                 </p>
 

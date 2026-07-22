@@ -171,116 +171,198 @@ class ApplicationService:
         self,
         application_id: int,
         request: ApplicationUpdate,
-        current_user
+        current_user,
     ):
-        application = self.application_repo.get_by_id(application_id)
+        application = self.application_repo.get_by_id(
+            application_id
+        )
 
         if not application:
             raise HTTPException(
                 status_code=404,
-                detail="Application not found."
+                detail="Application not found.",
             )
 
-        # Before update
         old_data = model_to_dict(application)
 
-        # Update application
-        self.application_repo.update(
-            application,
-            request.application.model_dump(
-                exclude_unset=True,
-                exclude_none=True
-            )
-        )
-
-        # Update related entities
-        if request.meta_data is not None:
-            self.metadata_repo.create_or_update(
-                application.id,
-                request.meta_data.model_dump(
-                    exclude_unset=True,
-                    exclude_none=True
+        try:
+            # Update main application only when supplied
+            if request.application is not None:
+                application_data = (
+                    request.application.model_dump(
+                        exclude_unset=True,
+                        exclude_none=True,
+                    )
                 )
-            )
 
-        if request.migration is not None:
-            self.migration_repo.create_or_update(
-                application.id,
-                request.migration.model_dump(
-                    exclude_unset=True,
-                    exclude_none=True
+                if application_data:
+                    self.application_repo.update(
+                        application,
+                        application_data,
+                    )
+
+            # Update metadata
+            if request.meta_data is not None:
+                metadata_data = (
+                    request.meta_data.model_dump(
+                        exclude_unset=True,
+                        exclude_none=True,
+                    )
                 )
-            )
 
-        if request.security is not None:
-            self.security_repo.create_or_update(
-                application.id,
-                request.security.model_dump(
-                    exclude_unset=True,
-                    exclude_none=True
+                if metadata_data:
+                    self.metadata_repo.create_or_update(
+                        application.id,
+                        metadata_data,
+                    )
+
+            # Update migration
+            if request.migration is not None:
+                migration_data = (
+                    request.migration.model_dump(
+                        exclude_unset=True,
+                        exclude_none=True,
+                    )
                 )
-            )
 
-        if request.remark is not None:
-            self.remark_repo.create_or_update(
-                application.id,
-                request.remark.model_dump(
-                    exclude_unset=True,
-                    exclude_none=True
+                if migration_data:
+                    self.migration_repo.create_or_update(
+                        application.id,
+                        migration_data,
+                    )
+
+            # Update security
+            if request.security is not None:
+                security_data = (
+                    request.security.model_dump(
+                        exclude_unset=True,
+                        exclude_none=True,
+                    )
                 )
+
+                if security_data:
+                    self.security_repo.create_or_update(
+                        application.id,
+                        security_data,
+                    )
+
+            # Update or create remark
+            if request.remark is not None:
+                remark_data = (
+                    request.remark.model_dump(
+                        exclude_unset=True,
+                        exclude_none=True,
+                    )
+                )
+
+                if remark_data:
+                    self.remark_repo.create_or_update(
+                        application.id,
+                        remark_data,
+                    )
+
+            # Replace owners only when owners field is supplied
+            if request.owners is not None:
+                owners_data = [
+                    owner.model_dump(
+                        exclude_unset=True,
+                    )
+                    for owner in request.owners
+                ]
+
+                self.owner_repo.replace_all(
+                    application.id,
+                    owners_data,
+                )
+
+            # Replace cloud mappings only when supplied
+            if request.cloud_ids is not None:
+                self.cloud_mapping_repo.replace_all(
+                    application.id,
+                    request.cloud_ids,
+                )
+
+            self.db.flush()
+
+            # Reload the latest state before audit/response
+            self.db.refresh(application)
+
+            new_data = model_to_dict(application)
+
+            self.audit_service.log(
+                current_user=current_user,
+                action="UPDATE",
+                module="Application",
+                description=(
+                    f"Updated application "
+                    f"'{application.application_name}'"
+                ),
+                resource_id=application.id,
+                old_values=old_data,
+                new_values=new_data,
             )
 
-        if request.owners is not None:
-            self.owner_repo.replace_all(
-                application.id,
-                request.owners
+            self.db.commit()
+            self.db.refresh(application)
+
+            return self.build_application_response(
+                application
             )
 
-        if request.cloud_ids is not None:
-            self.cloud_mapping_repo.replace_all(
-                application.id,
-                request.cloud_ids
-            )
-
-        # Flush so relationships/updates are reflected
-        self.db.flush()
-
-        # Capture new state
-        new_data = model_to_dict(application)
-
-        # Audit
-        self.audit_service.log(
-            current_user=current_user,
-            action="UPDATE",
-            module="Application",
-            description=f"Updated application '{application.application_name}'",
-            resource_id=application.id,
-            old_values=old_data,
-            new_values=new_data,
-        )
-
-        self.db.commit()
-        self.db.refresh(application)
-
-        return self.build_application_response(application)
+        except Exception:
+            self.db.rollback()
+            raise
 
 
     def build_application_response(
         self,
-        application
-    ):
-
+        application,
+    ) -> ApplicationDetailsResponse:
         return ApplicationDetailsResponse(
             application=application,
-            meta_data=application.meta_data,
-            migration=application.migration,
-            security=application.security,
-            remark=application.remarks,
-            owners=application.owners,
+            meta_data=getattr(
+                application,
+                "meta_data",
+                None,
+            ),
+            migration=getattr(
+                application,
+                "migration",
+                None,
+            ),
+            security=getattr(
+                application,
+                "security",
+                None,
+            ),
+            remark=list(
+                getattr(
+                    application,
+                    "remarks",
+                    None,
+                )
+                or []
+            ),
+            owners=list(
+                getattr(
+                    application,
+                    "owners",
+                    None,
+                )
+                or []
+            ),
             clouds=[
                 mapping.cloud
-                for mapping in application.cloud_mappings
-            ]
+                for mapping in (
+                    getattr(
+                        application,
+                        "cloud_mappings",
+                        None,
+                    )
+                    or []
+                )
+                if mapping.cloud is not None
+            ],
         )
 
     def create(

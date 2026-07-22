@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Depends
-from app.schemas.document_upload import UploadedFileResponse, UploadedFileCreate, UploadedFileUpdate
+from typing import Annotated, Literal
+
+from app.schemas.pagination import PaginatedResponse
+from fastapi import APIRouter, Depends, Query, status, UploadFile, File
+from app.schemas.document_upload import UploadedFileResponse, UploadedFileUpdate
 from app.dependencies.auth import UserRole, get_current_user, get_upload_service, require_roles
 
 
@@ -8,31 +11,34 @@ router = APIRouter(
     tags=["Uploads"]
 )
 
-from fastapi import APIRouter, Depends, File, UploadFile
 
 @router.post(
     "",
-    response_model=UploadedFileResponse
+    response_model=list[UploadedFileResponse],
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_upload(
-    file: UploadFile = File(...),
+    files: list[UploadFile] = File(
+        ...,
+        description="Select one or more CSV, XLSX, or XLS files",
+    ),
     current_user=Depends(
         require_roles(
             UserRole.ADMIN,
-            UserRole.MANAGER
-
+            UserRole.MANAGER,
         )
     ),
-    service=Depends(get_upload_service)
+    service=Depends(get_upload_service),
 ):
     return await service.create(
-        file=file,
-        user=current_user
+        files=files,
+        user=current_user,
     )
+
 
 @router.get(
     "",
-    response_model=list[UploadedFileResponse]
+    response_model=PaginatedResponse[UploadedFileResponse],
 )
 def get_uploads(
     current_user=Depends(
@@ -41,13 +47,46 @@ def get_uploads(
             UserRole.MANAGER,
             UserRole.EMPLOYEE,
             UserRole.VIEWER,
-
         )
     ),
-    service=Depends(get_upload_service)
-):
+    service=Depends(get_upload_service),
 
-    return service.get_all()
+    # Pagination
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 10,
+
+    # Searching
+    search: Annotated[
+        str | None,
+        Query(max_length=150),
+    ] = None,
+
+    # Filtering
+    status: str | None = None,
+    file_type: str | None = None,
+    uploaded_by_id: Annotated[int | None, Query(ge=1)] = None,
+
+    # Sorting
+    sort_by: Literal[
+        "id",
+        "original_filename",
+        "file_type",
+        "status",
+        "created_at",
+    ] = "created_at",
+
+    sort_order: Literal["asc", "desc"] = "desc",
+):
+    return service.get_all(
+        page=page,
+        page_size=page_size,
+        search=search,
+        status=status,
+        file_type=file_type,
+        uploaded_by_id=uploaded_by_id,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 @router.get(
     "/{upload_id}",

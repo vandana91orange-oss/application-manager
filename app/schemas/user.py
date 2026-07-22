@@ -6,6 +6,21 @@ import re
 
 from pydantic import BaseModel, EmailStr, field_validator, model_validator, Field
 
+# schemas/user.py
+
+from pydantic import BaseModel
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
+
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    items: list[T]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
 
 class UserCreate(BaseModel):
     first_name: str

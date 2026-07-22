@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     MAIL_SSL_TLS: bool = False
     CELERY_BROKER_URL: str
     CELERY_RESULT_BACKEND: str
+    FRONTEND_URL: str = "http://localhost:3000/"
     
 
 

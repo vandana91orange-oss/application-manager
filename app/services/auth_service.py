@@ -19,7 +19,7 @@ from app.models.users import User
 
 from app.core.security import hash_password
 
-from app.utils.send_password_email import send_reset_email
+from app.tasks.send_password_email import send_reset_email
 
 class AuthService:
 
@@ -137,7 +137,7 @@ class ForgetPasswordService:
                 + timedelta(minutes=15),
             )
 
-            send_reset_email(
+            send_reset_email.delay(
                 user.email,
                 token,
             )

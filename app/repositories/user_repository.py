@@ -1,4 +1,7 @@
-from sqlalchemy.orm import Session, joinedload
+from datetime import datetime
+from sqlalchemy import func, or_, select
+from sqlalchemy.orm import selectinload, Session, joinedload
+from app.models.password_reset import PasswordResetToken
 from fastapi import HTTPException
 
 from app.models.users import User
@@ -13,7 +16,14 @@ class UserRepository:
     ):
         self.db=db
 
-
+    SORTABLE_COLUMNS = {
+        "id": User.id,
+        "first_name": User.first_name,
+        "last_name": User.last_name,
+        "email": User.email,
+        "created_at": User.created_at,
+        
+    }
 
     def create(
         self,
@@ -38,15 +48,77 @@ class UserRepository:
 
 
 
-    def get_all(self):
+    def get_all(
+        self,
+        page: int = 1,
+        page_size: int = 10,
+        search: str | None = None,
+        role_id: int | None = None,
+        is_active: bool | None = None,
+        sort_by: str = "created_at",
+        sort_order: str = "desc",
+    ) -> tuple[list[User], int]:
 
-        return (
-            self.db.query(User)
-            .options(
-                joinedload(User.role)
-            )
-            .all()
+        filters = []
+
+        # Search by first name, last name or email
+        if search:
+            normalized_search = search.strip()
+
+            if normalized_search:
+                search_pattern = f"%{normalized_search}%"
+
+                filters.append(
+                    or_(
+                        User.first_name.ilike(search_pattern),
+                        User.last_name.ilike(search_pattern),
+                        User.email.ilike(search_pattern),
+                    )
+                )
+
+        # Filter by role
+        if role_id is not None:
+            filters.append(User.role_id == role_id)
+
+        # Filter active/inactive users
+        if is_active is not None:
+            filters.append(User.is_active == is_active)
+
+        # Count query
+        count_statement = (
+            select(func.count(User.id))
+            .select_from(User)
+            .where(*filters)
         )
+
+        total = self.db.scalar(count_statement) or 0
+
+        # Secure sorting
+        sort_column = self.SORTABLE_COLUMNS.get(
+            sort_by,
+            User.created_at,
+        )
+
+        if sort_order == "asc":
+            order_expression = sort_column.asc()
+        else:
+            order_expression = sort_column.desc()
+
+        offset = (page - 1) * page_size
+
+        # Data query
+        statement = (
+            select(User)
+            .options(selectinload(User.role))
+            .where(*filters)
+            .order_by(order_expression, User.id.desc())
+            .offset(offset)
+            .limit(page_size)
+        )
+
+        users = self.db.scalars(statement).all()
+
+        return list(users), total
 
 
 
