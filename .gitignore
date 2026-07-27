@@ -121,3 +121,5 @@ coverage.xml
 # Cache
 # =====================================
 .cache/
+.vercel
+.env*

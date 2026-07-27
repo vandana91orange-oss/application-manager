@@ -1,0 +1,17 @@
+[project]
+name = "application-manager"
+version = "0.1.0"
+
+dependencies = [
+    "fastapi",
+    "alembic",
+    "python-jose",
+    "passlib[bcrypt]",
+    "uvicorn",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "python-dotenv",
+    "python-multipart",
+    "pydantic",
+    "pydantic-settings",
+]
