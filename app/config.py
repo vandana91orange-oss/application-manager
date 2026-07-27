@@ -66,12 +66,12 @@ class Settings(BaseSettings):
                 f"{self.DATABASE_NAME}?sslmode=require"
             )
         return (
-                        f"postgresql+psycopg2://"
-                        f"{self.DATABASE_USER}:"
-                        f"{self.DATABASE_PASSWORD}@"
-                        f"{self.DATABASE_HOST}:"
-                        f"{self.DATABASE_NAME}?sslmode=require"
-                    )
+                f"postgresql+psycopg2://"
+                f"{self.DATABASE_USER}:"
+                f"{self.DATABASE_PASSWORD}@"
+                f"{self.DATABASE_HOST}/"
+                f"{self.DATABASE_NAME}?sslmode=require"
+            )
 
 
 
