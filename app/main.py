@@ -13,8 +13,6 @@ async def lifespan(app: FastAPI):
     yield
     print("Application stopped...")
 
-Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI(
     title="CSV Management API",
