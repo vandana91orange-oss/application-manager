@@ -7,11 +7,6 @@ from app.database import Base, engine
 from app.api.endpoints import users, roles, auth, upload_file, application_cloud, application, audit_logs, dashboard, application_roadmap
 
 
-# For development only.
-# In production, use Alembic migrations instead of create_all().
-Base.metadata.create_all(bind=engine)
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Application started...")
