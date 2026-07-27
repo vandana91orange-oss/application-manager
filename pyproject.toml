@@ -1,17 +1,16 @@
 [project]
-name = "application-manager"
+name = "service-manager"
 version = "0.1.0"
+requires-python = ">=3.12,<3.14"
 
 dependencies = [
     "fastapi",
-    "alembic",
-    "python-jose",
-    "passlib[bcrypt]",
     "uvicorn",
     "sqlalchemy",
     "psycopg2-binary",
-    "python-dotenv",
-    "python-multipart",
     "pydantic",
     "pydantic-settings",
+    "python-multipart",
+    "alembic",
+    "celery[redis]"
 ]
