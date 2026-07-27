@@ -69,7 +69,8 @@ class Settings(BaseSettings):
                 f"postgresql+psycopg://"
                 f"{self.DATABASE_USER}:"
                 f"{self.DATABASE_PASSWORD}@"
-                f"{self.DATABASE_HOST}/"
+                f"{self.DATABASE_HOST}:"
+                f"{self.DATABASE_PORT}/"
                 f"{self.DATABASE_NAME}?sslmode=require"
             )
 

@@ -3,6 +3,12 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config import settings
 
+
+print("ENV:", settings.ENV)
+print("DATABASE_HOST:", repr(settings.DATABASE_HOST))
+print("DATABASE_PORT:", settings.DATABASE_PORT)
+print("DATABASE_NAME:", settings.DATABASE_NAME)
+print("DATABASE_USER:", settings.DATABASE_USER)
 # SQLAlchemy Engine
 engine = create_engine(
     settings.DATABASE_URL,
