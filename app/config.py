@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str
     CELERY_RESULT_BACKEND: str
     FRONTEND_URL: str = "http://localhost:3000/"
+    ENV: str = "development"
     
 
 
@@ -55,14 +56,23 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self) -> str:
+        if self.ENV =="development":
+            return (
+                f"postgresql+psycopg2://"
+                f"{self.DATABASE_USER}:"
+                f"{self.DATABASE_PASSWORD}@"
+                f"{self.DATABASE_HOST}:"
+                f"{self.DATABASE_PORT}/"
+                f"{self.DATABASE_NAME}?sslmode=require"
+            )
         return (
-            f"postgresql+psycopg2://"
-            f"{self.DATABASE_USER}:"
-            f"{self.DATABASE_PASSWORD}@"
-            f"{self.DATABASE_HOST}:"
-            f"{self.DATABASE_PORT}/"
-            f"{self.DATABASE_NAME}?sslmode=require"
-        )
+                        f"postgresql+psycopg2://"
+                        f"{self.DATABASE_USER}:"
+                        f"{self.DATABASE_PASSWORD}@"
+                        f"{self.DATABASE_HOST}:"
+                        f"{self.DATABASE_NAME}?sslmode=require"
+                    )
+
 
 
 @lru_cache
