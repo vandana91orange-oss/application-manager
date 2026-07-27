@@ -12,5 +12,5 @@ dependencies = [
     "python-multipart",
     "alembic",
     "celery[redis]",
-    python-jose[cryptography]
+    "python-jose[cryptography]"
 ]
