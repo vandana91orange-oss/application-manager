@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     def DATABASE_URL(self) -> str:
         if self.ENV =="development":
             return (
-                f"postgresql+psycopg2://"
+                f"postgresql+psycopg://"
                 f"{self.DATABASE_USER}:"
                 f"{self.DATABASE_PASSWORD}@"
                 f"{self.DATABASE_HOST}:"
@@ -66,7 +66,7 @@ class Settings(BaseSettings):
                 f"{self.DATABASE_NAME}?sslmode=require"
             )
         return (
-                f"postgresql+psycopg2://"
+                f"postgresql+psycopg://"
                 f"{self.DATABASE_USER}:"
                 f"{self.DATABASE_PASSWORD}@"
                 f"{self.DATABASE_HOST}/"
