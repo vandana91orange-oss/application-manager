@@ -27,7 +27,7 @@ class CSVUploadedFile(Base):
 
     original_file_name = Column(
         String(255),
-        nullable=False
+        nullable=True
     )
 
     file_path = Column(

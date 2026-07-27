@@ -167,16 +167,7 @@ def get_cloud_applications(
     cloud: str | None = None,
     owner: str | None = None,
     domain: str | None = None,
-    service: ApplicationCloudService = Depends(get_application_service),
-    current_user=Depends(
-        require_roles(
-            UserRole.ADMIN,
-            UserRole.MANAGER,
-            UserRole.EMPLOYEE,
-            UserRole.VIEWER,
-
-        )
-    )
+    service: ApplicationCloudService = Depends(get_application_service)
 ):
     return service.get_applications_by_cloud(
         page=page,

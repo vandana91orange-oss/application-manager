@@ -12,3 +12,13 @@ from app.models.application_security import ApplicationSecurity
 from app.models.application_cloud import ApplicationCloud
 from app.models.application_cloud_mapping import ApplicationCloudMapping
 from app.models.audit_logs import AuditLog
+from app.models.application_roadmap import (
+    ApplicationRoadmapDetail,
+    ApplicationRoadmapImport,
+    ApplicationRoadmapResource,
+    ApplicationRoadmapTeam,
+    RoadmapEnvironment,
+    RoadmapPhase,
+    RoadmapResource,
+    RoadmapTeam,
+)

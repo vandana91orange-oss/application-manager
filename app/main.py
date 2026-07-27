@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.api.endpoints import users, roles, auth, upload_file, application_cloud, application, audit_logs, dashboard
+from app.api.endpoints import users, roles, auth, upload_file, application_cloud, application, audit_logs, dashboard, application_roadmap
 
 
 # For development only.
@@ -30,14 +30,20 @@ app = FastAPI(
 allowed_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://application-manager-ui.vercel.app"
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+        "Accept",
+        "Origin",
+        "ngrok-skip-browser-warning",
+    ],
 )
 
 # Routers
@@ -49,6 +55,8 @@ app.include_router(upload_file.router, prefix="/api/v1", tags=["Uploads"])
 app.include_router(application_cloud.router, prefix="/api/v1", tags=["Clouds"])
 app.include_router(audit_logs.router, prefix="/api/v1", tags=["AuditLogs"])
 app.include_router(dashboard.router, prefix="/api/v1", tags=["Dashboard"])
+app.include_router(application_roadmap.router, prefix="/api/v1", tags=["Application Roadmap"])
+
 
 
 @app.get("/", tags=["Health"])

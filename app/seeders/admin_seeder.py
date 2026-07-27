@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.models.users import User
 from app.models.roles import Role
-from app.security.password import hash_password
+from app.core.security import hash_password
 
 
 def seed_admin_user(db: Session):
